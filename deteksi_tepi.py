@@ -1,9 +1,10 @@
 from PIL import Image
 
 
-def deteksi_tepi(citra_A, citra_hasil):
-    batas_perbedaan = 32
+def deteksi_tepi(citra_A, citra_hasil, abuabu):
+    batas_perbedaan = 3
     penjelasan_tepi = 0
+    temp = 25
 
     citra = Image.open(citra_A)
     pixel = citra.load()
@@ -14,19 +15,32 @@ def deteksi_tepi(citra_A, citra_hasil):
     citra_baru = Image.new("RGB", (ukuran_horizontal, ukuran_vertikal))
     pixel_baru = citra_baru.load()
 
+    progress = 0
     for x in range(ukuran_horizontal-1):
         for y in range(ukuran_vertikal-1):
-            print(round((x+1) * 100 / (ukuran_horizontal-1)), '%', sep='')
-            print
-            grayscale = False
+            new_progress = round((x+1) * 100 / (ukuran_horizontal-1))
+            if progress != new_progress:
+                progress = new_progress
+                print(progress, '%', sep='')
+                print
+            # print(round((x+1) * 100 / (ukuran_horizontal-1)), '%', sep='')
+            # print
+            grayscale = abuabu
+            terapkan_signifikansi = True
 
             # kiri-kanan
 
             perbedaan = beda(pixel[x, y], pixel[x+1, y], batas_perbedaan)
             if perbedaan > batas_perbedaan:
-                R = pixel[x, y][0]
-                G = pixel[x, y][1]
-                B = pixel[x, y][2]
+                if terapkan_signifikansi:
+                    signifikansi = perbedaan - batas_perbedaan
+                    R = round(pixel[x, y][0] * signifikansi / temp)
+                    G = round(pixel[x, y][1] * signifikansi / temp)
+                    B = round(pixel[x, y][2] * signifikansi / temp)
+                else:
+                    R = pixel[x, y][0]
+                    G = pixel[x, y][1]
+                    B = pixel[x, y][2]
 
                 if grayscale:
                     rata_rata = round((R + G + B) / 3)
@@ -39,9 +53,15 @@ def deteksi_tepi(citra_A, citra_hasil):
             # atas-bawah
             perbedaan = beda(pixel[x, y], pixel[x, y+1], batas_perbedaan)
             if perbedaan > batas_perbedaan:
-                R = pixel[x, y][0]
-                G = pixel[x, y][1]
-                B = pixel[x, y][2]
+                if terapkan_signifikansi:
+                    signifikansi = perbedaan - batas_perbedaan
+                    R = round(pixel[x, y][0] * signifikansi / temp)
+                    G = round(pixel[x, y][1] * signifikansi / temp)
+                    B = round(pixel[x, y][2] * signifikansi / temp)
+                else:
+                    R = pixel[x, y][0]
+                    G = pixel[x, y][1]
+                    B = pixel[x, y][2]
 
                 if grayscale:
                     rata_rata = round((R + G + B) / 3)
@@ -54,9 +74,15 @@ def deteksi_tepi(citra_A, citra_hasil):
             # serong kiri
             perbedaan = beda(pixel[x, y], pixel[x+1, y+1], batas_perbedaan)
             if perbedaan > batas_perbedaan:
-                R = pixel[x, y][0]
-                G = pixel[x, y][1]
-                B = pixel[x, y][2]
+                if terapkan_signifikansi:
+                    signifikansi = perbedaan - batas_perbedaan
+                    R = round(pixel[x, y][0] * signifikansi / temp)
+                    G = round(pixel[x, y][1] * signifikansi / temp)
+                    B = round(pixel[x, y][2] * signifikansi / temp)
+                else:
+                    R = pixel[x, y][0]
+                    G = pixel[x, y][1]
+                    B = pixel[x, y][2]
 
                 if grayscale:
                     rata_rata = round((R + G + B) / 3)
@@ -70,9 +96,15 @@ def deteksi_tepi(citra_A, citra_hasil):
             if x > 0:
                 perbedaan = beda(pixel[x, y], pixel[x-1, y+1], batas_perbedaan)
                 if perbedaan > batas_perbedaan:
-                    R = pixel[x, y][0]
-                    G = pixel[x, y][1]
-                    B = pixel[x, y][2]
+                    if terapkan_signifikansi:
+                        signifikansi = perbedaan - batas_perbedaan
+                        R = round(pixel[x, y][0] * signifikansi / temp)
+                        G = round(pixel[x, y][1] * signifikansi / temp)
+                        B = round(pixel[x, y][2] * signifikansi / temp)
+                    else:
+                        R = pixel[x, y][0]
+                        G = pixel[x, y][1]
+                        B = pixel[x, y][2]
 
                     if grayscale:
                         rata_rata = round((R + G + B) / 3)
@@ -91,9 +123,11 @@ def beda(titik_a, titik_b, batas_perbedaan):
     beda_r = abs(titik_a[0] - titik_b[0])
     beda_g = abs(titik_a[1] - titik_b[1])
     beda_b = abs(titik_a[2] - titik_b[2])
-    rata_rata_beda = (beda_r + beda_g + beda_b) / 3
+    # rata_rata_beda = (beda_r + beda_g + beda_b) / 3
+    beda_terbesar = max(beda_r, beda_g, beda_b)
 
-    return round(rata_rata_beda)
+    # return round(rata_rata_beda)
+    return round(beda_terbesar)
 
 
 def clipping(intensitas):
@@ -101,4 +135,7 @@ def clipping(intensitas):
         return 255
 
 
-deteksi_tepi('seribu.jpg', 'gambar_hasil_deteksi_tepi.jpg')
+deteksi_tepi('burger.jpg', 'burger_tepi_grayscale.jpg', True)
+deteksi_tepi('burger.jpg', 'burger_tepi.jpg', False)
+deteksi_tepi('cafe.jpg', 'cafe_tepi_grayscale.jpg', True)
+deteksi_tepi('cafe.jpg', 'cafe_tepi.jpg', False)
